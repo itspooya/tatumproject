@@ -1,0 +1,17 @@
+version: "3"
+services:
+  data-ingestor:
+    image: data-ingestor
+    build: .
+    environment:
+      S3_BUCKET_NAME: tatum-data
+      S3_ACCESS_KEY: ACCESS_KEY
+      S3_SECRET_KEY: SECRET_KEY
+      S3_REGION: us-east-1
+      GCS_BUCKET_NAME: "tatum-data"
+      GOOGLE_API_FILE: "/etc/key.json"
+      DOWNLOAD_PATH: /tmp
+      STORAGE_PROVIDER: gcp,s3
+      BASE_URL: "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/"
+    volumes:
+      - ./key.json:/etc/key.json
