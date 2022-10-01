@@ -265,7 +265,7 @@ class DataProcessor:
         storage_client = storage.Client()
         buckets = list(storage_client.list_buckets())
         if self.gcs_upload_bucket not in [bucket.name for bucket in buckets]:
-            bucket = storage_client.create_bucket(gcs_upload_bucket)
+            bucket = storage_client.create_bucket(self.gcs_upload_bucket)
         else:
             bucket = storage_client.get_bucket(self.gcs_upload_bucket)
         processed_file_paths = self.extract
