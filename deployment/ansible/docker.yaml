@@ -1,0 +1,64 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+# Install Docker
+
+    - name: Make sure all required packages are installed
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+
+    - name: Create keyrings folder
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+        keyring: /etc/apt/keyrings/docker.gpg
+
+    - name: Add Docker's official APT repository
+      apt_repository:
+        repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 1
+
+    - name: Install Docker
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-compose-plugin
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Install Pip3
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Install docker pip module
+      pip:
+        name: docker
+        state: present

@@ -1,0 +1,3 @@
+- import_playbook: presetup.yaml
+- import_playbook: docker.yaml
+- import_playbook: run_project.yaml

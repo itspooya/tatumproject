@@ -26,7 +26,7 @@ services:
       S3_ACCESS_KEY: ACCESS_KEY
       S3_SECRET_KEY: SECRET_KEY
       S3_REGION: us-east-1
-      GCS_BUCKET_NAME: tatum-data
+      GCS_UPLOAD_BUCKET: tatum-data
       GOOGLE_API_FILE: "/etc/key.json"
       STORAGE_PROVIDER: s3
       PORT: 5000
