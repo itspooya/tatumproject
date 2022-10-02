@@ -1,8 +1,8 @@
 stages:
   - deploy
 
-dataingestor:
-    stage: dataingestor
+deploy:
+    stage: deploy
     image: ubuntu:latest
     only:
       refs:
