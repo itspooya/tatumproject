@@ -10,7 +10,7 @@
     - STORAGE_PROVIDER: "gcp"
     - BASE_URL: "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/"
     - PROCESSED_FOLDER: "/tmp/processed"
-    - PORT: 5000
+    - PORT: "5000"
   tasks:
     - name: get home directory
       shell: echo $HOME
