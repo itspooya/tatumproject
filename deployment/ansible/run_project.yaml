@@ -24,7 +24,7 @@
       git:
         repo: https://gitlab.com/Itscalledpooya/tatumproject.git
         dest: "{{ home_dir }}/tatumproject"
-        version: main
+        version: "deployment-add"
 
     - name: Build Ingestor docker image
       community.docker.docker_image:
