@@ -149,7 +149,7 @@ class DataIngestor:
         self.s3_access_key = os.environ.get('S3_ACCESS_KEY')
         self.s3_secret_key = os.environ.get('S3_SECRET_KEY')
         self.s3_region = os.environ.get('S3_REGION')
-        self.gcs_bucket_name = os.environ.get('GCS_BUCKET_NAME')
+        self.gcs_bucket_name = os.environ.get('GCS_DOWNLOAD_BUCKET')
         self.google_api_file = os.environ.get('GOOGLE_API_FILE')
         self.download_path = os.environ.get('DOWNLOAD_PATH')
         self.storage_provider = os.environ.get('STORAGE_PROVIDER')
