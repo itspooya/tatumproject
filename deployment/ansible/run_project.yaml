@@ -123,7 +123,7 @@
         volumes:
           - "{{ home_dir }}/tatumproject/ShowData/key.json:/etc/key.json"
         labels:
-          - "traefik.enable=true"
-          - "traefik.http.routers.showdata.rule=PathPrefix(`/`)"
-          - "traefik.http.routers.showdata.entrypoints=web"
+          traefik.enable: true
+          traefik.http.routers.showdata.rule: PathPrefix(`/`)
+          traefik.http.routers.showdata.entrypoints: web
 
