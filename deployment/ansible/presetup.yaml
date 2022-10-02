@@ -1,0 +1,54 @@
+---
+
+# Tasks to be applied after os initiliazing
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Check Conectivity
+      ping:
+        data: "ping"
+      tags: [connectivity]
+
+    - name: update apt cache
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 1
+      tags: [apt]
+
+    - name: Disable UFW
+      ufw:
+        state: disabled
+      tags: [ufw]
+
+    - name: Change Root Password
+      user:
+        name: root
+        password: "{{ root_password | password_hash('sha512') }}"
+      tags: [password]
+
+    - name: upgrade all packages
+      apt:
+        upgrade: dist
+        force_apt_get: yes
+      tags: [apt]
+
+    - name: Install Packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - xz-utils
+        - tcpdump
+        - nano
+        - vim
+        - iftop
+        - resolvconf
+        - screen
+
+    - name: reboot
+      reboot:
+        reboot_timeout: 600
+      tags: [reboot]
+
