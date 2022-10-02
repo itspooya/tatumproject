@@ -1,0 +1,31 @@
+stages:
+  - deploy
+
+dataingestor:
+    stage: dataingestor
+    image: ubuntu:latest
+    only:
+      refs:
+        - gitlab-ci
+        - main
+      changes:
+        - DataIngestor/*
+        - DataProcessor/*
+        - ShowData/*
+    before_script:
+      - mkdir -p ~/.ssh
+      - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+      - chmod 600 ~/.ssh/id_rsa
+      - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    script:
+      - ssh $SSH_USER@$SSH_HOST "cd $PROJECT_PATH && sudo git pull"
+      - |
+        echo "all:
+                children:
+                  dataserver:
+                    hosts: localhost
+                    vars:
+                      ansible_user: ubuntu" > inventory
+      - scp -r inventory $SSH_USER@$SSH_HOST:$PROJECT_PATH/deployment
+      - ssh $SSH_USER@$SSH_HOST "cd $PROJECT_PATH/deployment && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory ansible/run_project.yaml"
+
