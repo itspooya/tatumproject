@@ -77,6 +77,7 @@ resource "local_file" "root_password" {
   file_permission = "600"
   directory_permission = "700"
   content = random_password.root_password.result
+<<<<<<< HEAD
 }
 # copy key.json to the ansible folder
 resource "local_file" "key_json" {
@@ -84,4 +85,6 @@ resource "local_file" "key_json" {
   file_permission = "600"
   directory_permission = "700"
   content = file("./key.json")
+=======
+>>>>>>> origin/deployment-add
 }
