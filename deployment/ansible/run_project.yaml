@@ -1,0 +1,140 @@
+---
+# This ansible playbook aims to initialize project
+- hosts: all
+  become: yes
+  vars:
+    - GCS_DOWNLOAD_BUCKET: "tatum-download-xd"
+    - GCS_UPLOAD_BUCKET: "tatum-upload-xd"
+    - GOOGLE_API_FILE: "/etc/key.json"
+    - DOWNLOAD_PATH: "/tmp"
+    - STORAGE_PROVIDER: "gcp"
+    - BASE_URL: "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/"
+    - PROCESSED_FOLDER: "/tmp/processed"
+    - PORT: "5000"
+  tasks:
+    - name: get home directory
+      shell: echo $HOME
+      register: home_dir
+    - name: Create Project Folder
+      file:
+        path: "{{ home_dir.stdout }}/tatumproject"
+        state: directory
+        mode: 0755
+    - name: Clone the repository
+      git:
+        repo: https://gitlab.com/Itscalledpooya/tatumproject.git
+        dest: "{{ home_dir.stdout }}/tatumproject"
+        version: "main"
+
+    - name: Build Ingestor docker image
+      community.docker.docker_image:
+        name: ingestor
+        source: build
+        build:
+          path: "{{ home_dir.stdout }}/tatumproject/DataIngestor"
+          dockerfile: Dockerfile
+
+    - name: Build DataProcessor docker image
+      community.docker.docker_image:
+        name: processor
+        source: build
+        build:
+          path: "{{ home_dir.stdout }}/tatumproject/DataProcessor"
+          dockerfile: Dockerfile
+
+    - name: Build ShowData docker image
+      community.docker.docker_image:
+        name: showdata
+        source: build
+        build:
+          path: "{{ home_dir.stdout }}/tatumproject/ShowData"
+          dockerfile: Dockerfile
+
+    - name: copy google api key
+      copy:
+        src: "key.json"
+        dest: "{{ item }}"
+        mode: 0644
+        remote_src: no
+      with_items:
+        - "{{ home_dir.stdout }}/tatumproject/DataIngestor"
+        - "{{ home_dir.stdout }}/tatumproject/DataProcessor"
+        - "{{ home_dir.stdout }}/tatumproject/ShowData"
+
+    - name: Run docker container for ingestor
+      community.docker.docker_container:
+        name: ingestor
+        image: "ingestor"
+        state: started
+        detach: yes
+        restart_policy: always
+        env:
+          GCS_DOWNLOAD_BUCKET: "{{ GCS_DOWNLOAD_BUCKET }}"
+          GOOGLE_API_FILE: "{{ GOOGLE_API_FILE }}"
+          DOWNLOAD_PATH: "{{ DOWNLOAD_PATH }}"
+          STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
+          BASE_URL: "{{ BASE_URL }}"
+        volumes:
+          - "{{ home_dir.stdout }}/tatumproject/DataIngestor/key.json:/etc/key.json"
+
+    - name: Run docker container for processor
+      community.docker.docker_container:
+        name: processor
+        image: "processor"
+        state: started
+        detach: yes
+        restart_policy: always
+        env:
+          GCS_DOWNLOAD_BUCKET: "{{ GCS_DOWNLOAD_BUCKET }}"
+          GCS_UPLOAD_BUCKET: "{{ GCS_UPLOAD_BUCKET }}"
+          GOOGLE_API_FILE: "{{ GOOGLE_API_FILE }}"
+          DOWNLOAD_PATH: "{{ DOWNLOAD_PATH }}"
+          STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
+          PROCESSED_FOLDER: "{{ PROCESSED_FOLDER }}"
+        volumes:
+          - "{{ home_dir.stdout }}/tatumproject/DataProcessor/key.json:/etc/key.json"
+
+    - name:
+      community.docker.docker_network:
+        name: traefik
+        state: present
+
+    - name: Run Traefik container
+      community.docker.docker_container:
+        name: traefik
+        image: "traefik:v2.8"
+        networks:
+          - name: traefik
+        state: started
+        detach: yes
+        restart_policy: unless-stopped
+        ports:
+          - "80:80"
+          - "8080:8080"
+          - "443:443"
+        volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock"
+        command: "--api.insecure=true --providers.docker=true --providers.docker.exposedbydefault=false --entrypoints.web.address=:80"
+
+    - name: Run docker container for showdata
+      community.docker.docker_container:
+        name: showdata
+        image: "showdata"
+        networks:
+          - name: traefik
+        state: started
+        detach: yes
+        restart_policy: always
+        exposed_ports: "{{ PORT }}"
+        env:
+          GCS_UPLOAD_BUCKET: "{{ GCS_UPLOAD_BUCKET }}"
+          GOOGLE_API_FILE: "{{ GOOGLE_API_FILE }}"
+          STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
+          PORT: "{{ PORT }}"
+        volumes:
+          - "{{ home_dir.stdout }}/tatumproject/ShowData/key.json:/etc/key.json"
+        labels:
+          traefik.enable: "true"
+          traefik.http.routers.showdata.rule: "PathPrefix(`/`)"
+          traefik.http.routers.showdata.entrypoints: "web"
+

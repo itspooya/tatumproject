@@ -43,7 +43,7 @@ class ShowData:
         self.s3_region = os.getenv('S3_REGION')
         self.s3_access_key = os.getenv('S3_ACCESS_KEY')
         self.s3_secret_key = os.getenv('S3_SECRET_KEY')
-        self.gcs_bucket_name = os.getenv('GCS_BUCKET_NAME')
+        self.gcs_bucket_name = os.getenv('GCS_UPLOAD_BUCKET')
         self.google_api_file = os.getenv('GOOGLE_API_FILE')
         self.storage_provider = os.getenv('STORAGE_PROVIDER')
 
