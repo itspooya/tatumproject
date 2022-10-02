@@ -94,6 +94,11 @@
         volumes:
           - "{{ home_dir.stdout }}/tatumproject/DataProcessor/key.json:/etc/key.json"
 
+    - name:
+      community.docker.docker_network:
+        name: traefik
+        state: present
+
     - name: Run Traefik container
       community.docker.docker_container:
         name: traefik
@@ -110,12 +115,6 @@
         volumes:
           - "/var/run/docker.sock:/var/run/docker.sock"
         command: "--api.insecure=true --providers.docker=true --providers.docker.exposedbydefault=false --entrypoints.web.address=:80"
-
-    - name:
-      community.docker.docker_network:
-        name: traefik
-        state: present
-
 
     - name: Run docker container for showdata
       community.docker.docker_container:
