@@ -17,13 +17,13 @@
       register: home_dir
     - name: Create Project Folder
       file:
-        path: "{{ home_dir }}/tatumproject"
+        path: "{{ home_dir.stdout }}/tatumproject"
         state: directory
         mode: 0755
     - name: Clone the repository
       git:
         repo: https://gitlab.com/Itscalledpooya/tatumproject.git
-        dest: "{{ home_dir }}/tatumproject"
+        dest: "{{ home_dir.stdout }}/tatumproject"
         version: "deployment-add"
 
     - name: Build Ingestor docker image
@@ -31,7 +31,7 @@
         name: ingestor
         source: build
         build:
-          path: "{{ home_dir }}/tatumproject/DataIngestor"
+          path: "{{ home_dir.stdout }}/tatumproject/DataIngestor"
           dockerfile: Dockerfile
 
     - name: Build DataProcessor docker image
@@ -39,7 +39,7 @@
         name: processor
         source: build
         build:
-          path: "{{ home_dir }}/tatumproject/DataProcessor"
+          path: "{{ home_dir.stdout }}/tatumproject/DataProcessor"
           dockerfile: Dockerfile
 
     - name: Build ShowData docker image
@@ -47,7 +47,7 @@
         name: showdata
         source: build
         build:
-          path: "{{ home_dir }}/tatumproject/ShowData"
+          path: "{{ home_dir.stdout }}/tatumproject/ShowData"
           dockerfile: Dockerfile
 
     - name: copy google api key
@@ -55,10 +55,11 @@
         src: "key.json"
         dest: "{{ item }}"
         mode: 0644
+        remote_src: no
       with_items:
-        - "{{ home_dir }}/tatumproject/DataIngestor"
-        - "{{ home_dir }}/tatumproject/DataProcessor"
-        - "{{ home_dir }}/tatumproject/ShowData"
+        - "{{ home_dir.stdout }}/tatumproject/DataIngestor"
+        - "{{ home_dir.stdout }}/tatumproject/DataProcessor"
+        - "{{ home_dir.stdout }}/tatumproject/ShowData"
 
     - name: Run docker container for ingestor
       community.docker.docker_container:
@@ -74,7 +75,7 @@
           STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
           BASE_URL: "{{ BASE_URL }}"
         volumes:
-          - "{{ home_dir }}/tatumproject/DataIngestor/key.json:/etc/key.json"
+          - "{{ home_dir.stdout }}/tatumproject/DataIngestor/key.json:/etc/key.json"
 
     - name: Run docker container for processor
       community.docker.docker_container:
@@ -91,12 +92,14 @@
           STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
           PROCESSED_FOLDER: "{{ PROCESSED_FOLDER }}"
         volumes:
-          - "{{ home_dir }}/tatumproject/DataProcessor/key.json:/etc/key.json"
+          - "{{ home_dir.stdout }}/tatumproject/DataProcessor/key.json:/etc/key.json"
 
     - name: Run Traefik container
       community.docker.docker_container:
         name: traefik
         image: "traefik:v2.8"
+        networks:
+          - name: traefik
         state: started
         detach: yes
         restart_policy: unless-stopped
@@ -108,20 +111,29 @@
           - "/var/run/docker.sock:/var/run/docker.sock"
         command: "--api.insecure=true --providers.docker=true --providers.docker.exposedbydefault=false --entrypoints.web.address=:80"
 
+    - name:
+      community.docker.docker_network:
+        name: traefik
+        state: present
+
+
     - name: Run docker container for showdata
       community.docker.docker_container:
         name: showdata
         image: "showdata"
+        networks:
+          - name: traefik
         state: started
         detach: yes
         restart_policy: always
+        exposed_ports: "{{ PORT }}"
         env:
           GCS_UPLOAD_BUCKET: "{{ GCS_UPLOAD_BUCKET }}"
           GOOGLE_API_FILE: "{{ GOOGLE_API_FILE }}"
           STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
           PORT: "{{ PORT }}"
         volumes:
-          - "{{ home_dir }}/tatumproject/ShowData/key.json:/etc/key.json"
+          - "{{ home_dir.stdout }}/tatumproject/ShowData/key.json:/etc/key.json"
         labels:
           traefik.enable: "true"
           traefik.http.routers.showdata.rule: "PathPrefix(`/`)"
