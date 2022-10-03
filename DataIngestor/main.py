@@ -7,7 +7,7 @@ cron = BlockingScheduler()
 
 def main():
     """
-    Main FUnction in order to use apscheduler
+    Main FUnction in order to use APscheduler
     :return: None
     """
     ingestor = DataIngestor()
