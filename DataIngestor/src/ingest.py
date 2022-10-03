@@ -145,7 +145,7 @@ class DataIngestor:
         self._load_env()
 
     def _load_env(self):
-        self.s3_bucket_name = os.environ.get('S3_BUCKET_NAME')
+        self.s3_bucket_name = os.environ.get('S3_DOWNLOAD_BUCKET')
         self.s3_access_key = os.environ.get('S3_ACCESS_KEY')
         self.s3_secret_key = os.environ.get('S3_SECRET_KEY')
         self.s3_region = os.environ.get('S3_REGION')
