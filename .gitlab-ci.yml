@@ -17,7 +17,7 @@ deploy:
       - chmod 600 ~/.ssh/id_rsa
       - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     script:
-      - ssh $SSH_USER@$SSH_HOST -i ~/.ssh/id_rsa "sudo git -C $PROJECT_PATH pull && sudo chmod -R 777 $PROJECT_PATH"
+      - ssh $SSH_USER@$SSH_HOST -i ~/.ssh/id_rsa "sudo git -C $PROJECT_PATH pull"
       - |
         echo "all:
                 children:
@@ -25,6 +25,7 @@ deploy:
                     hosts: localhost
                     vars:
                       ansible_user: ubuntu" > inventory
-      - scp -r -i ~/.ssh/id_rsa inventory $SSH_USER@$SSH_HOST:$PROJECT_PATH/deployment
+      - scp -r -i ~/.ssh/id_rsa inventory $SSH_USER@$SSH_HOST:/home/$SSH_USER
+      - ssh $SSH_USER@$SSH_HOST -i ~/.ssh/id_rsa "sudo cp /home/$SSH_USER/inventory $PROJECT_PATH/deployment"
       - ssh $SSH_USER@$SSH_HOST ~/.ssh/id_rsa "cd $PROJECT_PATH/deployment && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory ansible/run_project.yaml"
 
