@@ -3,7 +3,6 @@ stages:
 
 deploy:
     stage: deploy
-    image: ubuntu:latest
     only:
       refs:
         - gitlab-ci
