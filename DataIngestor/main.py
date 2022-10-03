@@ -6,6 +6,10 @@ cron = BlockingScheduler()
 
 
 def main():
+    """
+    Main FUnction in order to use apscheduler
+    :return: None
+    """
     ingestor = DataIngestor()
     file_name = ingestor.download()
     ingestor.upload_file(file_name)
