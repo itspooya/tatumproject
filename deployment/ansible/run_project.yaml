@@ -138,3 +138,10 @@
           traefik.http.routers.showdata.rule: "PathPrefix(`/`)"
           traefik.http.routers.showdata.entrypoints: "web"
 
+    - name: Install Ansible for CI/CD
+      apt:
+        name: ansible
+        state: present
+        update_cache: yes
+
+
