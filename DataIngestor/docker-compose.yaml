@@ -4,11 +4,11 @@ services:
     image: data-ingestor
     build: .
     environment:
-      S3_BUCKET_NAME: tatum-data
+      S3_DOWNLOAD_BUCKET: tatum-data
       S3_ACCESS_KEY: ACCESS_KEY
       S3_SECRET_KEY: SECRET_KEY
       S3_REGION: us-east-1
-      GCS_DOWNLOAD_BUCKET: "tatum-data"
+      GCS_DOWNLOAD_BUCKET: "tatum-data-download"
       GOOGLE_API_FILE: "/etc/key.json"
       DOWNLOAD_PATH: /tmp
       STORAGE_PROVIDER: gcp,s3
