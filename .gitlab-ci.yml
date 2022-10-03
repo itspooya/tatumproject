@@ -27,5 +27,5 @@ deploy:
                       ansible_user: ubuntu" > inventory
       - scp -r -i ~/.ssh/id_rsa inventory $SSH_USER@$SSH_HOST:/home/$SSH_USER
       - ssh $SSH_USER@$SSH_HOST -i ~/.ssh/id_rsa "sudo cp /home/$SSH_USER/inventory $PROJECT_PATH/deployment"
-      - ssh $SSH_USER@$SSH_HOST ~/.ssh/id_rsa "sudo ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $PROJECT_PATH/deployment/inventory $PROJECT_PATH/deployment/ansible/run_project.yaml"
+      - ssh $SSH_USER@$SSH_HOST -i ~/.ssh/id_rsa "sudo ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $PROJECT_PATH/deployment/inventory $PROJECT_PATH/deployment/ansible/run_project.yaml"
 
