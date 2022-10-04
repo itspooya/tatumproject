@@ -12,18 +12,15 @@
     - PROCESSED_FOLDER: "/tmp/processed"
     - PORT: "5000"
   tasks:
-    - name: get home directory
-      shell: echo $HOME
-      register: home_dir
     - name: Create Project Folder
       file:
-        path: "{{ home_dir.stdout }}/tatumproject"
+        path: "/opt/tatumproject"
         state: directory
         mode: 0755
     - name: Clone the repository
       git:
         repo: https://gitlab.com/Itscalledpooya/tatumproject.git
-        dest: "{{ home_dir.stdout }}/tatumproject"
+        dest: "/opt/tatumproject"
         version: "main"
 
     - name: Build Ingestor docker image
@@ -31,7 +28,7 @@
         name: ingestor
         source: build
         build:
-          path: "{{ home_dir.stdout }}/tatumproject/DataIngestor"
+          path: "/opt/tatumproject/DataIngestor"
           dockerfile: Dockerfile
 
     - name: Build DataProcessor docker image
@@ -39,7 +36,7 @@
         name: processor
         source: build
         build:
-          path: "{{ home_dir.stdout }}/tatumproject/DataProcessor"
+          path: "/opt/tatumproject/DataProcessor"
           dockerfile: Dockerfile
 
     - name: Build ShowData docker image
@@ -47,7 +44,7 @@
         name: showdata
         source: build
         build:
-          path: "{{ home_dir.stdout }}/tatumproject/ShowData"
+          path: "/opt/tatumproject/ShowData"
           dockerfile: Dockerfile
 
     - name: copy google api key
@@ -57,9 +54,9 @@
         mode: 0644
         remote_src: no
       with_items:
-        - "{{ home_dir.stdout }}/tatumproject/DataIngestor"
-        - "{{ home_dir.stdout }}/tatumproject/DataProcessor"
-        - "{{ home_dir.stdout }}/tatumproject/ShowData"
+        - "/opt/tatumproject/DataIngestor"
+        - "/opt/tatumproject/DataProcessor"
+        - "/opt/tatumproject/ShowData"
 
     - name: Run docker container for ingestor
       community.docker.docker_container:
@@ -75,7 +72,7 @@
           STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
           BASE_URL: "{{ BASE_URL }}"
         volumes:
-          - "{{ home_dir.stdout }}/tatumproject/DataIngestor/key.json:/etc/key.json"
+          - "/opt/tatumproject/DataIngestor/key.json:/etc/key.json"
 
     - name: Run docker container for processor
       community.docker.docker_container:
@@ -92,7 +89,7 @@
           STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
           PROCESSED_FOLDER: "{{ PROCESSED_FOLDER }}"
         volumes:
-          - "{{ home_dir.stdout }}/tatumproject/DataProcessor/key.json:/etc/key.json"
+          - "/opt/tatumproject/DataProcessor/key.json:/etc/key.json"
 
     - name:
       community.docker.docker_network:
@@ -132,7 +129,7 @@
           STORAGE_PROVIDER: "{{ STORAGE_PROVIDER }}"
           PORT: "{{ PORT }}"
         volumes:
-          - "{{ home_dir.stdout }}/tatumproject/ShowData/key.json:/etc/key.json"
+          - "/opt/tatumproject/ShowData/key.json:/etc/key.json"
         labels:
           traefik.enable: "true"
           traefik.http.routers.showdata.rule: "PathPrefix(`/`)"
