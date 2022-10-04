@@ -34,18 +34,25 @@ class ProgressPercentage(object):
 
 
 # check if the file is gzipped from file content
-def is_gzipped(file_name):
+def is_gzipped(file_name: str) -> bool:
+    """
+    This function checks whether file is gzipped
+    :param file_name: file_name(full path)
+    :return: True | False
+    :rtype: bool
+    """
     with open(file_name, 'rb') as f:
         return f.read(2) == b'\x1f\x8b'
 
 
-def s3_client_builder(access_key, secret_key, region):
+def s3_client_builder(access_key, secret_key, region) -> object:
     """
     This method use imported values from import_env_var function and creates s3 connection
     :param access_key: access key for s3
     :param secret_key: secret key for s3
     :param region: region for s3
     :return: s3_client to use with s3
+    :rtype: object
     """
     # Region is set to eu-west-1 by default
     client_config = Config(
@@ -67,13 +74,27 @@ def s3_client_builder(access_key, secret_key, region):
 
 
 class DataProcessor:
+    """
+    This class aims to have data processor as one class
+    """
     def __init__(self):
+        """
+        Load ENVs at class initialization
+        """
         self._load_env()
 
     def _set_google_api(self):
+        """
+        This function sets the GOOGLE_APPLICATION_CREDENTIALS as env
+        :return: None
+        """
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.google_api_file
 
     def _load_env(self):
+        """
+        Function to load ENVs
+        :return: None
+        """
         self.access_key = os.getenv('S3_ACCESS_KEY')
         self.secret_key = os.getenv('S3_SECRET_KEY')
         self.region = os.getenv('S3_REGION')
@@ -87,6 +108,10 @@ class DataProcessor:
         self.storage_provider = os.getenv('STORAGE_PROVIDER')
 
     def runit(self):
+        """
+        A function to run from APscheduler or anything else
+        :return: None
+        """
         # check storage providers
         if "s3" in self.storage_provider:
             self.upload_to_s3()
@@ -97,10 +122,11 @@ class DataProcessor:
             exit(1)
 
     @property
-    def last_file_s3(self):
+    def last_file_s3(self) -> str:
         """
         This method returns the last file from the bucket
         :return: last_file_s3
+        :rtype: str
         """
         # get last file from s3
         s3_client = s3_client_builder(self.access_key, self.secret_key, self.region)
@@ -119,10 +145,11 @@ class DataProcessor:
             exit(1)
 
     @property
-    def get_last_file_from_gcs(self):
+    def get_last_file_from_gcs(self) -> str:
         """
         This method gets the last file from gcs
-        :return: None
+        :return: last file from gcs
+        :rtype: str
         """
         self._set_google_api()
         storage_client = storage.Client()
@@ -139,10 +166,11 @@ class DataProcessor:
             exit(1)
 
     @property
-    def download_from_s3(self):
+    def download_from_s3(self) -> str:
         """
         This method downloads the last file from s3
-        :return: None
+        :return: file_path of downloaded file from s3
+        :rtype: str
         """
         s3_client = s3_client_builder(self.access_key, self.secret_key, self.region)
         # Check if the download folder exists
@@ -157,10 +185,11 @@ class DataProcessor:
         return file_path
 
     @property
-    def download_from_gcs(self):
+    def download_from_gcs(self)-> str:
         """
         Downloads the last file from gcs
         :return: file_path
+        :rtype: str
         """
         self._set_google_api()
         storage_client = storage.Client()
@@ -178,10 +207,11 @@ class DataProcessor:
         return file_path
 
     @property
-    def extract(self):
+    def extract(self) -> list:
         """
         This method extracts the last file from s3
         :return: file_paths of the extracted data
+        :rtype: list
         """
         file_paths = []
         providers = self.storage_provider.split(',')

@@ -36,7 +36,7 @@ class ProgressPercentage(object):
             sys.stdout.flush()
 
 
-def download(url, download_path=None, file_name_string=None):
+def download(url: str, download_path: str = None, file_name_string: str = None) -> str:
     """
     Download a file from a url and save it to a specified path
     :param url: url to download from
@@ -44,6 +44,7 @@ def download(url, download_path=None, file_name_string=None):
     :param file_name_string: string to use as the file name(overrides the file name in the url, currently not used in
     the code but can be used in the future)
     :return: file name(with path) of the downloaded file
+    :rtype: str
     """
     try:
         if download_path is not None:
@@ -66,13 +67,14 @@ def download(url, download_path=None, file_name_string=None):
     return file_name_string
 
 
-def s3_client_builder(access_key, secret_key, region):
+def s3_client_builder(access_key: str, secret_key: str, region: str):
     """
     This method use imported values from import_env_var function and creates s3 connection
     :param access_key: access key for s3
     :param secret_key: secret key for s3
     :param region: region for s3
     :return: s3_client to use with s3
+    :rtype: object
     """
     # Region is set to eu-west-1 by default
     client_config = Config(
@@ -93,7 +95,18 @@ def s3_client_builder(access_key, secret_key, region):
     return s3_client
 
 
-def upload_to_s3(file_name, bucket, access_key, secret_key, region="eu-west-1", object_name=None):
+def upload_to_s3(file_name: str, bucket: str, access_key: str, secret_key: str, region: str = "eu-west-1",
+                 object_name: str = None):
+    """
+    This Function Uploads File into S3(AWS)
+    :param file_name: filename of file which to be uploaded
+    :param bucket: bucket name in S3 AWS
+    :param access_key: Access key of AWS s3
+    :param secret_key: Secret key of AWS S3
+    :param region: region of AWS S3(Default = eu-west-1)
+    :param object_name: filename on the S3 bucket
+    :return: None
+    """
     s3 = s3_client_builder(access_key, secret_key, region)
     # If the bucket does not exist, create it
     s3.create_bucket(Bucket=bucket)
@@ -141,10 +154,23 @@ def upload_to_gcs(file_name, bucket_name, object_name=None):
 
 
 class DataIngestor:
+    """
+    This class aims to have whole data ingestor as one class for better readability and also usage as a package
+
+    Check README.md for ENVs that must be declared
+    """
+
     def __init__(self):
+        """
+        Load ENVs at class initialization
+        """
         self._load_env()
 
     def _load_env(self):
+        """
+        Function to load ENVs
+        :return: None
+        """
         self.s3_bucket_name = os.environ.get('S3_DOWNLOAD_BUCKET')
         self.s3_access_key = os.environ.get('S3_ACCESS_KEY')
         self.s3_secret_key = os.environ.get('S3_SECRET_KEY')
@@ -155,9 +181,18 @@ class DataIngestor:
         self.storage_provider = os.environ.get('STORAGE_PROVIDER')
 
     def _set_google_api(self):
+        """
+        This function sets the GOOGLE_APPLICATION_CREDENTIALS as env
+        :return: None
+        """
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.google_api_file
 
-    def download(self):
+    def download(self) -> str:
+        """
+        This function downloads the file into the download_path provided in ENV
+        :return: file_name(full path)
+        :rtype: str
+        """
         # Check if the download path is provided
         if self.download_path is not None:
             file_name = download(self.url, self.download_path)
@@ -167,6 +202,11 @@ class DataIngestor:
             return file_name
 
     def upload_file(self, file_name):
+        """
+        This function uploads files into cloud storages based on provided ENVs
+        :param file_name: file_name(full path)
+        :return: None
+        """
         # get providers list from env
         providers = self.storage_provider.split(',')
         for provider in providers:
@@ -180,7 +220,12 @@ class DataIngestor:
                 upload_to_gcs(file_name, self.gcs_bucket_name)
 
     @property
-    def url(self):
+    def url(self) -> str:
+        """
+        This function(property) creates dynamic link from the COVID-19 for last uploaded CSV
+        :return: URL for csv in order to be downloaded
+        :rtype: str
+        """
         base_url = os.getenv('BASE_URL')
         today = datetime.today().strftime('%m-%d-%Y')
         url = f"{base_url}/{today}.csv"

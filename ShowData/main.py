@@ -5,6 +5,9 @@ from flask_apscheduler import APScheduler
 
 
 class Config(object):
+    """
+    Job configuration for flask apscheduler
+    """
     JOBS = [
         {
             'id': 'job1',
@@ -17,6 +20,10 @@ class Config(object):
 
 
 def updater():
+    """
+    Function for Apscheduler to call
+    :return:
+    """
     show_data = ShowData()
     show_data.update_data()
 
@@ -30,6 +37,10 @@ scheduler.start()
 
 @app.route('/')
 def index():
+    """
+    Returns static home page of processed html
+    :return:
+    """
     # check if html file doesn't exist get it
     if not os.path.isfile('static/index.html'):
         first_run = ShowData()
