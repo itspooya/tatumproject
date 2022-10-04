@@ -7,14 +7,14 @@ it to extract data relevant to Czecia and Prague and display it in a single HTML
 
 There are multiple ways to use this project
 
-1. Simplest one would be downloading whole project changing variables in docker-compose files present in each 
-folder(dataprocessor,dataingestor,showdata) and then creating a service account for GCP or filling aws keys and manually
-installing docker and running them
+1. Simplest one would be downloading whole project changing variables in docker-compose files present in each
+   folder(dataprocessor,dataingestor,showdata) and then creating a service account for GCP or filling aws keys and manually
+   installing docker and running them
 
 2. Get a service account from gcp and then copy downloaded json key to deployment folder as key.json and change
-project in providers.tf in deployment with project in service account or google dashboard, Install ansible and terraform, then run following commands
-which would show ip for new created instance and generated ssh key in deployment/sshkeys and root password that you can access ip with port 80
-to see the output
+   project in providers.tf in deployment with project in service account or google dashboard, Install ansible and terraform, then run following commands
+   which would show ip for new created instance and generated ssh key in deployment/sshkeys and root password that you can access ip with port 80
+   to see the output
     - terraform init
     - terraform plan
     - terraform apply
@@ -49,35 +49,3 @@ using ansible for deployment and using pure bash for example
 | PROCESSED_FOLDER    | Path which Data Processor sends processed files into     | YES      | /tmp/processed                                                                                                   | *                                                                                                                |
 | PORT                | Port which Flask listens to                              | NO       | 5000                                                                                                             | Any int                                                                                                          |
 
-
-
-
-## Todo
-
-- [ ] Create Issues for TODO in Gitlab project for better readability
-- [ ] Create Documentation for each class and function 
-- [X] Finish the README.md
-- [X] Write the code
-- [ ] Write all the tests
-- [ ] Refactor the code
-- [X] Create docker images
-- [X] Create a CI/CD pipeline
-- [X] Create Simple docker-compose file
-- [ ] Write Healthchecks for Docker
-- [ ] Create Pushgateway for Download and processing
-- [ ] Implement Kubernetes deployment
-- [ ] Automate Kubernetes deployment with Helm
-- [ ] Refactor the CI/CD pipeline
-- [ ] Changelog
-- [ ] Terraform states in repository or cloud storage
-- [ ] Gitlab Pages using jenkins
-- [ ] Wiki for Questions and samples
-- [ ] Support other data sources
-- [ ] Support Azure
-- [ ] Make it a pip package
-- [ ] A script or MakeFile to install Ansible and other required packages
-- [ ] Support Multiple service account files for better security
-- [ ] Change project path from /root to /opt
-- [ ] Make Dockerfile use entrypoint.sh to call gunicorn in order to have ability to change port
-- [ ] Create a diagram for the project which shows how everything is connected and works
-- [ ] Make it more like an ETL process which would be adding historic data as well
