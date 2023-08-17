@@ -33,4 +33,4 @@ six==1.16.0
 tzdata==2022.4
 tzlocal==4.2
 urllib3==1.26.12
-Werkzeug==2.2.2
+Werkzeug==2.2.3
